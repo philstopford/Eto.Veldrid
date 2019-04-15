@@ -155,6 +155,19 @@ namespace PlaceholderName
 	// provide the platform-specific code necessary to get up and running.
 	public class VeldridSurfaceHandler : ThemedControlHandler<Panel, VeldridSurface, VeldridSurface.ICallback>, VeldridSurface.IHandler
 	{
+		public GraphicsDeviceOptions GraphicsDeviceOptions { get; } = new GraphicsDeviceOptions
+		{
+			// These two options address a pair of major differences between
+			// Veldrid's various graphics APIs, as discussed here:
+			//
+			//   https://veldrid.dev/articles/backend-differences.html
+			//
+			// These features aren't available on all systems, but when present
+			// they're a simple way to accommodate the different conventions.
+			PreferDepthRangeZeroToOne = true,
+			PreferStandardClipSpaceYDirection = true
+		};
+
 		public Control RenderTarget
 		{
 			get { return Control.Content; }
@@ -230,7 +243,7 @@ namespace PlaceholderName
 				VeldridGL.ResizeSwapchain);
 
 			Widget.GraphicsDevice = GraphicsDevice.CreateOpenGL(
-				new GraphicsDeviceOptions(false, Veldrid.PixelFormat.R32_Float, false),
+				GraphicsDeviceOptions,
 				platformInfo,
 				(uint)Widget.Width,
 				(uint)Widget.Height);
@@ -247,15 +260,15 @@ namespace PlaceholderName
 		{
 			if (Widget.Backend == GraphicsBackend.Metal)
 			{
-				Widget.GraphicsDevice = GraphicsDevice.CreateMetal(new GraphicsDeviceOptions());
+				Widget.GraphicsDevice = GraphicsDevice.CreateMetal(GraphicsDeviceOptions);
 			}
 			else if (Widget.Backend == GraphicsBackend.Vulkan)
 			{
-				Widget.GraphicsDevice = GraphicsDevice.CreateVulkan(new GraphicsDeviceOptions());
+				Widget.GraphicsDevice = GraphicsDevice.CreateVulkan(GraphicsDeviceOptions);
 			}
 			else if (Widget.Backend == GraphicsBackend.Direct3D11)
 			{
-				Widget.GraphicsDevice = GraphicsDevice.CreateD3D11(new GraphicsDeviceOptions());
+				Widget.GraphicsDevice = GraphicsDevice.CreateD3D11(GraphicsDeviceOptions);
 			}
 			else
 			{

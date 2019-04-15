@@ -75,7 +75,7 @@ namespace PlaceholderName
 			CurrentTime = DateTime.Now;
 			ModelMatrix *= Matrix4x4.CreateFromAxisAngle(
 				new Vector3(0, 0, 1),
-				OpenTK.MathHelper.DegreesToRadians(Convert.ToSingle((CurrentTime - PreviousTime).TotalMilliseconds / 10.0)));
+				OpenTK.MathHelper.DegreesToRadians(-Convert.ToSingle((CurrentTime - PreviousTime).TotalMilliseconds / 10.0)));
 			PreviousTime = CurrentTime;
 			CommandList.UpdateBuffer(ModelBuffer, 0, ModelMatrix);
 
@@ -125,10 +125,10 @@ namespace PlaceholderName
 
 			VertexPositionColor[] quadVertices =
 			{
-				new VertexPositionColor(new Vector2(-.75f, -.75f), RgbaFloat.Red),
-				new VertexPositionColor(new Vector2(.75f, -.75f), RgbaFloat.Green),
-				new VertexPositionColor(new Vector2(-.75f, .75f), RgbaFloat.Blue),
-				new VertexPositionColor(new Vector2(.75f, .75f), RgbaFloat.Yellow)
+				new VertexPositionColor(new Vector2(-.75f, .75f), RgbaFloat.Red),
+				new VertexPositionColor(new Vector2(.75f, .75f), RgbaFloat.Green),
+				new VertexPositionColor(new Vector2(-.75f, -.75f), RgbaFloat.Blue),
+				new VertexPositionColor(new Vector2(.75f, -.75f), RgbaFloat.Yellow)
 			};
 
 			ushort[] quadIndices = { 0, 1, 2, 3 };
@@ -161,39 +161,9 @@ namespace PlaceholderName
 			byte[] vertexShaderSpirvBytes = LoadSpirvBytes(ShaderStages.Vertex);
 			byte[] fragmentShaderSpirvBytes = LoadSpirvBytes(ShaderStages.Fragment);
 
-			var options = new CrossCompileOptions();
-			switch (Surface.GraphicsDevice.BackendType)
-			{
-				// InvertVertexOutputY and FixClipSpaceZ address two major
-				// differences between Veldrid's various graphics APIs, as
-				// discussed here:
-				//
-				//   https://veldrid.dev/articles/backend-differences.html
-				//
-				// Note that the only reason those options are useful in this
-				// example project is that the vertices being drawn are stored
-				// the way Vulkan stores vertex data. The options will therefore
-				// properly convert from the Vulkan style to whatever's used by
-				// the destination backend. If you store vertices in a different
-				// coordinate system, these may not do anything for you, and
-				// you'll need to handle the difference in your shader code.
-				case GraphicsBackend.Metal:
-					options.InvertVertexOutputY = true;
-					break;
-				case GraphicsBackend.Direct3D11:
-					options.InvertVertexOutputY = true;
-					break;
-				case GraphicsBackend.OpenGL:
-					options.FixClipSpaceZ = true;
-					options.InvertVertexOutputY = true;
-					break;
-				default:
-					break;
-			}
-				
 			var vertex = new ShaderDescription(ShaderStages.Vertex, vertexShaderSpirvBytes, "main", true);
 			var fragment = new ShaderDescription(ShaderStages.Fragment, fragmentShaderSpirvBytes, "main", true);
-			Shader[] shaders = factory.CreateFromSpirv(vertex, fragment, options);
+			Shader[] shaders = factory.CreateFromSpirv(vertex, fragment);
 
 			Pipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription
 			{
