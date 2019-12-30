@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Eto.Platform.Windows" Version="2.5.0-ci-10388" />
+    <PackageReference Include="Eto.Platform.Windows" Version="2.5.0-ci-10403" />
     <PackageReference Include="OpenTK" Version="3.1.0" />
   </ItemGroup>
 
