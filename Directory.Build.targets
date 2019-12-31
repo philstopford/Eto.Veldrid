@@ -16,6 +16,7 @@
   </Target>
 
   <Target Name="NeatenizeLibraries" AfterTargets="SetPaths" Condition="$(OutputType) != 'library'">
+    <!--
     <ItemGroup>
       <Uglies Include="$(NeatenizePath)*" />
       <Uglies Remove="$(NeatenizePath)$(AssemblyName).exe" />
@@ -24,6 +25,7 @@
       <Uglies Remove="$(NeatenizePath)shaders" />
     </ItemGroup>
     <Move SourceFiles="@(Uglies)" DestinationFolder="$(NeatenizePath)lib" />
+    -->
   </Target>
 
   <Target Name="CopyShaders" AfterTargets="NeatenizeLibraries" Condition="$(OutputType) != 'library'">
