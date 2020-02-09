@@ -24,31 +24,29 @@ namespace VeldridEto
         public bool changed;
 
 		public float minX, maxX, minY, maxY;
-		public bool enableFilledPolys;
-		public bool immediateMode; // if true, don't use VBOs.
-		public bool drawPoints;
-		public RectangleF bounds;
-		public float base_zoom;
-		public float zoomFactor;
-		public Int32 zoomStep;
-		public bool allowZoomAndPan;
-		public bool dynamicGrid;
-		public bool panning;
-		public bool selecting;
-		public bool showGrid;
-		public bool showAxes;
-		public bool showDrawn;
-		public int gridSpacing;
+		bool enableFilledPolys;
+		bool showPoints;
+		float base_zoom;
+		float zoomFactor;
+		Int32 zoomStep;
+		bool allowZoomAndPan;
+		bool dynamicGrid;
+		bool panning;
+		bool selecting;
+		bool showGrid;
+		bool showAxes;
+		bool showDrawn;
+		int grid_spacing;
 		public Color minorGridColor;
-		public Color majorGridColor;
-		public Color axisColor;
-		public Color backColor;
-		public Color selectionColor;
-		public Color inverSelectionColor;
-		public PointF cameraPosition;
-		public PointF default_cameraPosition;
-		public bool antiAlias;
-		public bool lockedViewport;
+        public Color majorGridColor;
+        public Color axisColor;
+        public Color backColor;
+        public Color selectionColor;
+        public Color inverSelectionColor;
+		PointF cameraPosition;
+		PointF default_cameraPosition;
+		bool antiAlias;
+		bool lockedViewport;
 
         public List<ovp_Poly> polyList;
         public List<int> polyListPtCount;
@@ -61,6 +59,228 @@ namespace VeldridEto
         public List<int> lineSourceIndex; // will eventually track source of polygon, allowing for layer generating, etc. in output.
         public List<ovp_Poly> tessPolyList; // triangles, but also need to track color. This is decoupled to allow boundary extraction without triangles getting in the way.
         public List<bool> drawnPoly; // tracks whether the polygon corresponds to an enabled configuration or not.
+
+        public bool aA()
+        {
+            return antiAlias;
+        }
+
+        public void aA(bool val)
+        {
+            if (antiAlias == val)
+            {
+                return;
+            }
+            antiAlias = val;
+            changed = true;
+        }
+
+        public bool drawGrid()
+        {
+            return showGrid;
+        }
+
+        public void drawGrid(bool val)
+        {
+            if (showGrid == val)
+            {
+                return;
+            }
+            showGrid = val;
+            changed = true;
+        }
+
+        public bool drawPoints()
+        {
+            return showPoints;
+        }
+
+        public void drawPoints (bool val)
+        {
+            if (showPoints == val)
+            {
+                return;
+            }
+            showPoints = val;
+            changed = true;
+        }
+
+        public bool drawDrawn()
+        {
+            return showDrawn;
+        }
+
+        public void drawDrawn(bool val)
+        {
+            if (showDrawn == val)
+            {
+                return;
+            }
+            showDrawn = val;
+            changed = true;
+        }
+
+        public bool drawFilled()
+        {
+            return enableFilledPolys;
+        }
+
+        public void drawFilled(bool val)
+        {
+            if (enableFilledPolys == val)
+            {
+                return;
+            }
+            enableFilledPolys = val;
+            changed = true;
+        }
+
+        public bool drawAxes()
+        {
+            return showAxes;
+        }
+
+        public void drawAxes(bool val)
+        {
+            if (showAxes == val)
+            {
+                return;
+            }
+            showAxes = val;
+            changed = true;
+        }
+
+        public bool isGridDynamic()
+        {
+            return dynamicGrid;
+        }
+
+        public void isGridDynamic(bool val)
+        {
+            if (dynamicGrid == val)
+            {
+                return;
+            }
+            dynamicGrid = val;
+            changed = true;
+        }
+
+        public float gridSpacing()
+        {
+            return grid_spacing;
+        }
+
+        public void resetCamera()
+        {
+            if (lockedViewport)
+            {
+                return;
+            }
+            setCameraPos(default_cameraPosition.X, default_cameraPosition.Y);
+            setZoomFactor(1.0f);
+        }
+
+        public void setCameraPos(float x, float y)
+        {
+            setCameraX(x);
+            setCameraY(y);
+        }
+
+        public PointF getCameraPos()
+        {
+            return cameraPosition;
+        }
+
+        public void setCameraX(float x)
+        {
+            if (lockedViewport)
+            {
+                return;
+            }
+            cameraPosition.X = x;
+            changed = true;
+        }
+
+        public void setCameraY(float y)
+        {
+            if (lockedViewport)
+            {
+                return;
+            }
+            cameraPosition.Y = y;
+            changed = true;
+        }
+
+        public float getCameraX()
+        {
+            return cameraPosition.X;
+        }
+
+        public float getCameraY()
+        {
+            return cameraPosition.Y;
+        }
+
+        public float getBaseZoom()
+        {
+            return base_zoom;
+        }
+
+        public void setBaseZoom(float val)
+        {
+            if (base_zoom == val)
+            {
+                return;
+            }
+            base_zoom = val;
+        }
+        public void setZoomFactor(float val)
+        {
+            if (lockedViewport)
+            {
+                return;
+            }
+            if (val < 0.0001)
+            {
+                val = 0.0001f; // avoid any chance of getting to zero.
+            }
+            zoomFactor = val;
+            changed = true;
+        }
+
+        public float getZoomFactor()
+        {
+            return zoomFactor;
+        }
+
+        public int getZoomStep()
+        {
+            return zoomStep;
+        }
+
+        public void setZoomStep(int val)
+        {
+            if (zoomStep == val)
+            {
+                return;
+            }
+            zoomStep = val;
+        }
+
+        public void lockVP(bool val)
+        {
+            if (val == lockedViewport)
+            {
+                return;
+            }
+            lockedViewport = val;
+            changed = true;
+        }
+
+        public bool isLocked()
+        {
+            return lockedViewport;
+        }
 
         public float zoom()
 		{
@@ -205,16 +425,15 @@ namespace VeldridEto
 			inverSelectionColor = SystemColors.Highlight;
 			allowZoomAndPan = true;
 			enableFilledPolys = false;
-			drawPoints = true;
+			showPoints = true;
 			dynamicGrid = true;
 			panning = false;
 			selecting = false;
 			showGrid = true;
 			showAxes = true;
-			gridSpacing = 10;
+			grid_spacing = 10;
 			antiAlias = true;
 			zoomStep = 1;
-			immediateMode = false;
 			fullReset(defX, defY);
 		}
 

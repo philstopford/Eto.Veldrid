@@ -14,6 +14,7 @@ namespace Eto.Veldrid
 	[Handler(typeof(VeldridSurface.IHandler))]
 	public class VeldridSurface : Control
 	{
+		public float dpiFactor = 1.0f;
 		public new interface IHandler : Control.IHandler
 		{
 			int RenderWidth { get; }
@@ -61,17 +62,17 @@ namespace Eto.Veldrid
 		/// (e.g. with high DPI displays).
 		/// </summary>
 		public int RenderHeight => Handler.RenderHeight;
-		public float DpiFactor { get; protected set; }
 
 		public GraphicsContext OpenTKGraphicsContext { get; protected set; }
-		public GraphicsMode OpenTKGraphicsMode { get; } = new GraphicsMode(
-			color: new ColorFormat(32),
-			depth: 8,
-			stencil: 8);
+		public OpenTKOptions OpenTKOptions { get; } = new OpenTKOptions(
+			new GraphicsMode(new ColorFormat(32)),
+			3,
+			3,
+			GraphicsContextFlags.ForwardCompatible);
 
-		public GraphicsBackend Backend { get; set; }
+		public GraphicsBackend Backend { get; set; } = PreferredBackend;
 		public GraphicsDevice GraphicsDevice { get; set; }
-		public GraphicsDeviceOptions GraphicsDeviceOptions { get; private set; }
+		public GraphicsDeviceOptions GraphicsDeviceOptions { get; private set; } = new GraphicsDeviceOptions();
 		public Swapchain Swapchain { get; set; }
 
 		public const string VeldridInitializedEvent = "VeldridSurface.VeldridInitialized";
@@ -94,20 +95,26 @@ namespace Eto.Veldrid
 			remove { Properties.RemoveEvent(ResizeEvent, value); }
 		}
 
-		public VeldridSurface() : this(PreferredBackend)
+		public VeldridSurface()
 		{
 		}
-		public VeldridSurface(GraphicsBackend backend) : this(backend, new GraphicsDeviceOptions())
+		public VeldridSurface(GraphicsBackend backend)
 		{
+			Backend = backend;
 		}
 		public VeldridSurface(GraphicsDeviceOptions options) : this(PreferredBackend, options)
 		{
 		}
-		public VeldridSurface(GraphicsBackend backend, GraphicsDeviceOptions options)
+		public VeldridSurface(GraphicsBackend backend, GraphicsDeviceOptions gdOptions)
 		{
-			DpiFactor = (float)RenderWidth / (float)Width;
 			Backend = backend;
-			GraphicsDeviceOptions = options;
+			GraphicsDeviceOptions = gdOptions;
+		}
+		public VeldridSurface(GraphicsBackend backend, GraphicsDeviceOptions gdOptions, OpenTKOptions tKOptions)
+		{
+			Backend = backend;
+			GraphicsDeviceOptions = gdOptions;
+			OpenTKOptions = tKOptions;
 		}
 
 		/// <summary>
@@ -118,13 +125,14 @@ namespace Eto.Veldrid
 		public static void InitializeOpenTK()
 		{
 			// Ensure that OpenTK ignores SDL2 if it's installed.
+			var options = new ToolkitOptions { Backend = PlatformBackend.PreferNative };
 			//
 			// This is technically only important for OpenGL, as it's the only
 			// Veldrid backend that uses OpenTK, but since Veldrid also allows
 			// live switching of backends, it's worth doing regardless of which
 			// one users start out with. Anyone who plans to completely avoid
 			// OpenGL is free to simply not call InitializeOpenTK at all.
-			Toolkit.Init(new ToolkitOptions { Backend = PlatformBackend.PreferNative });
+			Toolkit.Init(options);
 		}
 
 		private static GraphicsBackend GetPreferredBackend()
@@ -188,7 +196,7 @@ namespace Eto.Veldrid
 					GraphicsDevice = GraphicsDevice.CreateD3D11(GraphicsDeviceOptions);
 					break;
 				case GraphicsBackend.OpenGL:
-					Handler.UpdateWindowInfo(OpenTKGraphicsMode);
+					Handler.UpdateWindowInfo(OpenTKOptions.Mode);
 
 					var glInfo = new OpenGLPlatformInfo(
 						VeldridGL.GetGLContextHandle(),
@@ -237,7 +245,7 @@ namespace Eto.Veldrid
 				Swapchain.Resize((uint)e.Width, (uint)e.Height);
 			}
 
-			DpiFactor = (float)RenderWidth / (float)Width;
+			dpiFactor = (float)RenderWidth / (float)Width;
 
 			Properties.TriggerEvent(ResizeEvent, this, e);
 		}
@@ -254,10 +262,11 @@ namespace Eto.Veldrid
 			if (OpenTKGraphicsContext == null)
 			{
 				OpenTKGraphicsContext = new GraphicsContext(
-					OpenTKGraphicsMode,
+					OpenTKOptions.Mode,
 					Handler.WindowInfo,
-					3, 3,
-					GraphicsContextFlags.ForwardCompatible);
+					OpenTKOptions.MajorVersion,
+					OpenTKOptions.MinorVersion,
+					OpenTKOptions.Flags);
 			}
 			else
 			{

@@ -145,7 +145,7 @@ namespace VeldridEto
 		float gridZ;
 
 		// Use for drag handling.
-		bool dragging;
+		public bool dragging;
 		float x_orig;
 		float y_orig;
 
@@ -164,8 +164,8 @@ namespace VeldridEto
 
 		Point WorldToScreen(float x, float y)
 		{
-			return new Point((int)((x - ovpSettings.cameraPosition.X / (ovpSettings.zoomFactor * ovpSettings.base_zoom)) + Surface.RenderWidth / 2),
-					(int)((y - ovpSettings.cameraPosition.Y / (ovpSettings.zoomFactor * ovpSettings.base_zoom)) + Surface.RenderHeight / 2));
+			return new Point((int)((x - ovpSettings.getCameraX() / (ovpSettings.getZoomFactor() * ovpSettings.getBaseZoom())) + Surface.RenderWidth / 2),
+					(int)((y - ovpSettings.getCameraY() / (ovpSettings.getZoomFactor() * ovpSettings.getBaseZoom())) + Surface.RenderHeight / 2));
 		}
 
 		Size WorldToScreen(SizeF pt)
@@ -177,8 +177,8 @@ namespace VeldridEto
 
 		PointF ScreenToWorld(int x, int y)
 		{
-			return new PointF((x - Surface.RenderWidth / 2) * (ovpSettings.zoomFactor * ovpSettings.base_zoom) + ovpSettings.cameraPosition.X,
-					 (y - Surface.RenderHeight / 2) * (ovpSettings.zoomFactor * ovpSettings.base_zoom) + ovpSettings.cameraPosition.Y);
+			return new PointF((x - Surface.RenderWidth / 2) * (ovpSettings.getZoomFactor() * ovpSettings.getBaseZoom()) + ovpSettings.getCameraX(),
+					 (y - Surface.RenderHeight / 2) * (ovpSettings.getZoomFactor() * ovpSettings.getBaseZoom()) + ovpSettings.getCameraY());
 		}
 
 		void downHandler(object sender, MouseEventArgs e)
@@ -192,7 +192,7 @@ namespace VeldridEto
 
 		void setDown(float x, float y)
 		{
-			if (!dragging && !ovpSettings.lockedViewport) // might not be needed, but seemed like a safe approach to avoid re-setting these in a drag event.
+			if (!dragging && !ovpSettings.isLocked()) // might not be needed, but seemed like a safe approach to avoid re-setting these in a drag event.
 			{
 				x_orig = x;
 				y_orig = y;
@@ -202,7 +202,7 @@ namespace VeldridEto
 
 		public void saveLocation()
 		{
-			savedLocation = new PointF(ovpSettings.cameraPosition.X, ovpSettings.cameraPosition.Y);
+			savedLocation = new PointF(ovpSettings.getCameraX(), ovpSettings.getCameraY());
 			savedLocation_valid = true;
 		}
 
@@ -230,13 +230,12 @@ namespace VeldridEto
 
 			if (zoomLevel_x > zoomLevel_y)
 			{
-				ovpSettings.zoomFactor = zoomLevel_x / ovpSettings.base_zoom;
+				ovpSettings.setZoomFactor(zoomLevel_x / ovpSettings.getBaseZoom());
 			}
 			else
 			{
-				ovpSettings.zoomFactor = zoomLevel_y / ovpSettings.base_zoom;
+				ovpSettings.setZoomFactor(zoomLevel_y / ovpSettings.getBaseZoom());
 			}
-			ovpSettings.changed = true;
 
 			goToLocation(cX, cY);
 		}
@@ -245,27 +244,26 @@ namespace VeldridEto
 		{
 			if (savedLocation_valid)
 			{
-				ovpSettings.cameraPosition = new PointF(savedLocation.X, savedLocation.Y);
-				ovpSettings.changed = true;
+				ovpSettings.setCameraPos(savedLocation.X, savedLocation.Y);
 				updateViewport();
 			}
 		}
 
 		public void goToLocation(float x, float y)
 		{
-			ovpSettings.cameraPosition = new PointF(x, y);
+			ovpSettings.setCameraPos(x, y);
 			updateViewport();
 		}
 
 		void dragHandler(object sender, MouseEventArgs e)
 		{
-			if (ovpSettings.lockedViewport)
+			if (ovpSettings.isLocked())
 			{
 				return;
 			}
 			if (e.Buttons == MouseButtons.Primary)
 			{
-				PointF scaledLocation = e.Location * Surface.DpiFactor;
+				PointF scaledLocation = e.Location * Surface.dpiFactor;
 
 				if (!dragging)
 				{
@@ -274,10 +272,9 @@ namespace VeldridEto
 				object locking = new object();
 				lock (locking)
 				{
-					float new_X = (ovpSettings.cameraPosition.X - ((scaledLocation.X - x_orig) * ovpSettings.zoomFactor * ovpSettings.base_zoom));
-					float new_Y = (ovpSettings.cameraPosition.Y + ((scaledLocation.Y - y_orig) * ovpSettings.zoomFactor * ovpSettings.base_zoom));
-					ovpSettings.cameraPosition = new PointF(new_X, new_Y);
-					ovpSettings.changed = true;
+					float new_X = (ovpSettings.getCameraX() - ((scaledLocation.X - x_orig) * ovpSettings.getZoomFactor() * ovpSettings.getBaseZoom()));
+					float new_Y = (ovpSettings.getCameraY() + ((scaledLocation.Y - y_orig) * ovpSettings.getZoomFactor() * ovpSettings.getBaseZoom()));
+					ovpSettings.setCameraPos(new_X, new_Y);
 					x_orig = scaledLocation.X;
 					y_orig = scaledLocation.Y;
 				}
@@ -288,8 +285,7 @@ namespace VeldridEto
 
 		public void freeze_thaw()
 		{
-			ovpSettings.lockedViewport = !ovpSettings.lockedViewport;
-			ovpSettings.changed = true;
+			ovpSettings.lockVP(!ovpSettings.isLocked());
 			updateHostFunc?.Invoke();
 		}
 
@@ -302,7 +298,7 @@ namespace VeldridEto
 					menu.Show(Surface);
 				}
 			}
-			if (ovpSettings.lockedViewport)
+			if (ovpSettings.isLocked())
 			{
 				return;
 			}
@@ -315,46 +311,24 @@ namespace VeldridEto
 
 		public void zoomIn(float delta)
 		{
-			if (ovpSettings.lockedViewport)
-			{
-				return;
-			}
-			ovpSettings.zoomFactor += (ovpSettings.zoomStep * 0.01f * delta);
-			ovpSettings.changed = true;
+            ovpSettings.setZoomFactor(ovpSettings.getZoomFactor() + (ovpSettings.getZoomStep() * 0.01f * delta));
+            updateHostFunc?.Invoke();
 		}
 
 		public void zoomOut(float delta)
 		{
-			if (ovpSettings.lockedViewport)
-			{
-				return;
-			}
-			ovpSettings.zoomFactor -= (ovpSettings.zoomStep * 0.01f * delta);
-			if (ovpSettings.zoomFactor < 0.0001)
-			{
-				ovpSettings.zoomFactor = 0.0001f; // avoid any chance of getting to zero.
-			}
-			ovpSettings.changed = true;
-		}
+			ovpSettings.setZoomFactor(ovpSettings.getZoomFactor() - (ovpSettings.getZoomStep() * 0.01f * delta));
+            updateHostFunc?.Invoke();
+        }
 
-		void panVertical(float delta)
+        void panVertical(float delta)
 		{
-			if (ovpSettings.lockedViewport)
-			{
-				return;
-			}
-			ovpSettings.cameraPosition.Y += delta / 10;
-			ovpSettings.changed = true;
+            ovpSettings.setCameraY(ovpSettings.getCameraY() + (delta / 10));
 		}
 
 		void panHorizontal(float delta)
 		{
-			if (ovpSettings.lockedViewport)
-			{
-				return;
-			}
-			ovpSettings.cameraPosition.X += delta / 10;
-			ovpSettings.changed = true;
+			ovpSettings.setCameraX(ovpSettings.getCameraX() + (delta / 10));
 		}
 
 		void addKeyHandler(object sender, EventArgs e)
@@ -369,30 +343,24 @@ namespace VeldridEto
 
 		public void reset()
 		{
-			if (ovpSettings.lockedViewport)
-			{
-				return;
-			}
-			ovpSettings.cameraPosition = new PointF(ovpSettings.default_cameraPosition.X, ovpSettings.default_cameraPosition.Y);
-			ovpSettings.zoomFactor = 1.0f;
-			ovpSettings.changed = true;
+            ovpSettings.resetCamera();
 		}
 
 		void keyHandler(object sender, KeyEventArgs e)
 		{
-			if (ovpSettings.lockedViewport)
+			if (ovpSettings.isLocked())
 			{
 				if (e.Key != Keys.F)
 				{
 					return;
 				}
-				ovpSettings.lockedViewport = false;
+				ovpSettings.lockVP(false);
 				return;
 			}
 
 			if (e.Key == Keys.F)
 			{
-				ovpSettings.lockedViewport = true;
+				ovpSettings.lockVP(true);
 				return;
 			}
 
@@ -401,7 +369,7 @@ namespace VeldridEto
 				reset();
 			}
 
-			float stepping = 10.0f * ovpSettings.zoomFactor;
+			float stepping = 10.0f * ovpSettings.getZoomFactor();
 
 			bool doUpdate = true;
 			if (e.Key == Keys.A)
@@ -444,7 +412,7 @@ namespace VeldridEto
 
 		void zoomHandler(object sender, MouseEventArgs e)
 		{
-			if (ovpSettings.lockedViewport)
+			if (ovpSettings.isLocked())
 			{
 				return;
 			}
@@ -572,7 +540,7 @@ namespace VeldridEto
 
 				uint tCounter = 0;
 
-				if (ovpSettings.enableFilledPolys)
+				if (ovpSettings.drawFilled())
 				{
 					numPolys += tessPolyListCount;
 				}
@@ -584,7 +552,7 @@ namespace VeldridEto
 
 				float polyZ = 0;
 
-				if (ovpSettings.enableFilledPolys)
+				if (ovpSettings.drawFilled())
 				{
 					for (int poly = 0; poly < tessPolyListCount; poly++)
 					{
@@ -604,7 +572,7 @@ namespace VeldridEto
 				for (int poly = 0; poly < polyListCount; poly++)
 				{
 					float alpha = ovpSettings.polyList[poly].alpha;
-					if (ovpSettings.enableFilledPolys)
+					if (ovpSettings.drawFilled())
 					{
 						alpha = 1.0f;
 					}
@@ -621,7 +589,7 @@ namespace VeldridEto
 										new RgbaFloat(ovpSettings.polyList[poly].color.R, ovpSettings.polyList[poly].color.G, ovpSettings.polyList[poly].color.B, alpha)));
 						counter++;
 
-						if (ovpSettings.drawPoints)
+						if (ovpSettings.drawPoints())
 						{
 							tFirst.Add(tCounter);
 							pointsList.Add(new VertexPositionColor(new Vector3(ovpSettings.polyList[poly].poly[pt].X - (pointWidth / 2.0f), ovpSettings.polyList[poly].poly[pt].Y - (pointWidth / 2.0f), 1.0f), new RgbaFloat(ovpSettings.polyList[poly].color.R, ovpSettings.polyList[poly].color.G, ovpSettings.polyList[poly].color.B, alpha)));
@@ -728,10 +696,10 @@ namespace VeldridEto
 
 		void drawGrid()
 		{
-			if (ovpSettings.showGrid)
+			if (ovpSettings.drawGrid())
 			{
-				float spacing = ovpSettings.gridSpacing;
-				if (ovpSettings.dynamicGrid)
+				float spacing = ovpSettings.gridSpacing();
+				if (ovpSettings.isGridDynamic())
 				{
 					while (WorldToScreen(new SizeF(spacing, 0.0f)).Width > 12.0f)
 						spacing /= 10.0f;
@@ -740,12 +708,16 @@ namespace VeldridEto
 						spacing *= 10.0f;
 				}
 
+                float zoom = ovpSettings.getZoomFactor() * ovpSettings.getBaseZoom();
+                float x = ovpSettings.getCameraX();
+                float y = ovpSettings.getCameraY();
+
 				List<VertexPositionColor> grid = new List<VertexPositionColor>();
 
 				if (WorldToScreen(new SizeF(spacing, 0.0f)).Width >= 4.0f)
 				{
 					int k = 0;
-					for (float i = 0; i > -(Surface.RenderWidth * (ovpSettings.zoomFactor * ovpSettings.base_zoom)) + ovpSettings.cameraPosition.X; i -= spacing)
+					for (float i = 0; i > -(Surface.RenderWidth * zoom) + x; i -= spacing)
 					{
 						float r = 0.0f;
 						float g = 0.0f;
@@ -764,11 +736,11 @@ namespace VeldridEto
 							k = 0;
 						}
 						k++;
-						grid.Add(new VertexPositionColor(new Vector3(i, ovpSettings.cameraPosition.Y + (ovpSettings.zoomFactor * ovpSettings.base_zoom) * Surface.RenderHeight, gridZ), new RgbaFloat(r, g, b, 1.0f)));
-						grid.Add(new VertexPositionColor(new Vector3(i, ovpSettings.cameraPosition.Y + (ovpSettings.zoomFactor * ovpSettings.base_zoom) * -Surface.RenderHeight, gridZ), new RgbaFloat(r, g, b, 1.0f)));
+						grid.Add(new VertexPositionColor(new Vector3(i, y + zoom * Surface.RenderHeight, gridZ), new RgbaFloat(r, g, b, 1.0f)));
+						grid.Add(new VertexPositionColor(new Vector3(i, y + zoom * -Surface.RenderHeight, gridZ), new RgbaFloat(r, g, b, 1.0f)));
 					}
 					k = 0;
-					for (float i = 0; i < (Surface.RenderWidth * (ovpSettings.zoomFactor * ovpSettings.base_zoom)) + ovpSettings.cameraPosition.X; i += spacing)
+					for (float i = 0; i < (Surface.RenderWidth * zoom) + x; i += spacing)
 					{
 						float r = 0.0f;
 						float g = 0.0f;
@@ -787,11 +759,11 @@ namespace VeldridEto
 							k = 0;
 						}
 						k++;
-						grid.Add(new VertexPositionColor(new Vector3(i, ovpSettings.cameraPosition.Y + (ovpSettings.zoomFactor * ovpSettings.base_zoom) * Surface.RenderHeight, gridZ), new RgbaFloat(r, g, b, 1.0f)));
-						grid.Add(new VertexPositionColor(new Vector3(i, ovpSettings.cameraPosition.Y + (ovpSettings.zoomFactor * ovpSettings.base_zoom) * -Surface.RenderHeight, gridZ), new RgbaFloat(r, g, b, 1.0f)));
+						grid.Add(new VertexPositionColor(new Vector3(i, y + zoom * Surface.RenderHeight, gridZ), new RgbaFloat(r, g, b, 1.0f)));
+						grid.Add(new VertexPositionColor(new Vector3(i, y + zoom * -Surface.RenderHeight, gridZ), new RgbaFloat(r, g, b, 1.0f)));
 					}
 					k = 0;
-					for (float i = 0; i > -(Surface.RenderHeight * (ovpSettings.zoomFactor * ovpSettings.base_zoom)) + ovpSettings.cameraPosition.Y; i -= spacing)
+					for (float i = 0; i > -(Surface.RenderHeight * zoom) + y; i -= spacing)
 					{
 						float r = 0.0f;
 						float g = 0.0f;
@@ -810,11 +782,11 @@ namespace VeldridEto
 							k = 0;
 						}
 						k++;
-						grid.Add(new VertexPositionColor(new Vector3(ovpSettings.cameraPosition.X + (ovpSettings.zoomFactor * ovpSettings.base_zoom) * Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
-						grid.Add(new VertexPositionColor(new Vector3(ovpSettings.cameraPosition.X + (ovpSettings.zoomFactor * ovpSettings.base_zoom) * -Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
+						grid.Add(new VertexPositionColor(new Vector3(x + zoom * Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
+						grid.Add(new VertexPositionColor(new Vector3(x + zoom * -Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
 					}
 					k = 0;
-					for (float i = 0; i < (Surface.RenderHeight * (ovpSettings.zoomFactor * ovpSettings.base_zoom)) + ovpSettings.cameraPosition.Y; i += spacing)
+					for (float i = 0; i < (Surface.RenderHeight * zoom) + y; i += spacing)
 					{
 						float r = 0.0f;
 						float g = 0.0f;
@@ -833,8 +805,8 @@ namespace VeldridEto
 							k = 0;
 						}
 						k++;
-						grid.Add(new VertexPositionColor(new Vector3(ovpSettings.cameraPosition.X + (ovpSettings.zoomFactor * ovpSettings.base_zoom) * Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
-						grid.Add(new VertexPositionColor(new Vector3(ovpSettings.cameraPosition.X + (ovpSettings.zoomFactor * ovpSettings.base_zoom) * -Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
+						grid.Add(new VertexPositionColor(new Vector3(x + zoom * Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
+						grid.Add(new VertexPositionColor(new Vector3(x + zoom * -Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
 					}
 					gridArray = grid.ToArray();
 					gridIndices = new ushort[gridArray.Length];
@@ -851,13 +823,14 @@ namespace VeldridEto
 
 		void drawAxes()
 		{
-			if (ovpSettings.showAxes)
+			if (ovpSettings.drawAxes())
 			{
+                float zoom = ovpSettings.getBaseZoom() * ovpSettings.getZoomFactor();
 				axesArray = new VertexPositionColor[4];
-				axesArray[0] = new VertexPositionColor(new Vector3(0.0f, ovpSettings.cameraPosition.Y + Surface.RenderHeight * (ovpSettings.zoomFactor * ovpSettings.base_zoom), axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
-				axesArray[1] = new VertexPositionColor(new Vector3(0.0f, ovpSettings.cameraPosition.Y - Surface.RenderHeight * (ovpSettings.zoomFactor * ovpSettings.base_zoom), axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
-				axesArray[2] = new VertexPositionColor(new Vector3(ovpSettings.cameraPosition.X + Surface.RenderWidth * (ovpSettings.zoomFactor * ovpSettings.base_zoom), 0.0f, axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
-				axesArray[3] = new VertexPositionColor(new Vector3(ovpSettings.cameraPosition.X - Surface.RenderWidth * (ovpSettings.zoomFactor * ovpSettings.base_zoom), 0.0f, axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
+				axesArray[0] = new VertexPositionColor(new Vector3(0.0f, ovpSettings.getCameraY() + Surface.RenderHeight * zoom, axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
+				axesArray[1] = new VertexPositionColor(new Vector3(0.0f, ovpSettings.getCameraY() - Surface.RenderHeight * zoom, axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
+				axesArray[2] = new VertexPositionColor(new Vector3(ovpSettings.getCameraX() + Surface.RenderWidth * zoom, 0.0f, axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
+				axesArray[3] = new VertexPositionColor(new Vector3(ovpSettings.getCameraX() - Surface.RenderWidth * zoom, 0.0f, axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
 
 				axesIndices = new ushort[4] { 0, 1, 2, 3 };
 
@@ -925,12 +898,12 @@ namespace VeldridEto
 				new Vector3(0, 0, 1), 0);
 			CommandList.UpdateBuffer(ModelBuffer, 0, ModelMatrix);
 
-			float zoom = ovpSettings.zoomFactor * ovpSettings.base_zoom;
+			float zoom = ovpSettings.getZoomFactor() * ovpSettings.getBaseZoom();
 
-			float left = ovpSettings.cameraPosition.X - (Surface.RenderWidth / 2) * zoom;
-			float right = ovpSettings.cameraPosition.X + (Surface.RenderWidth / 2) * zoom;
-			float bottom = ovpSettings.cameraPosition.Y + (Surface.RenderHeight / 2) * zoom;
-			float top = ovpSettings.cameraPosition.Y - (Surface.RenderHeight / 2) * zoom;
+			float left = ovpSettings.getCameraX() - (Surface.RenderWidth / 2) * zoom;
+			float right = ovpSettings.getCameraX() + (Surface.RenderWidth / 2) * zoom;
+			float bottom = ovpSettings.getCameraY() + (Surface.RenderHeight / 2) * zoom;
+			float top = ovpSettings.getCameraY() - (Surface.RenderHeight / 2) * zoom;
 
 			ViewMatrix = Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, 0.0f, 1.0f);
 			CommandList.UpdateBuffer(ViewBuffer, 0, ViewMatrix);
@@ -949,93 +922,150 @@ namespace VeldridEto
 
 			if (GridVertexBuffer != null)
 			{
-				CommandList.SetVertexBuffer(0, GridVertexBuffer);
-				CommandList.SetIndexBuffer(GridIndexBuffer, IndexFormat.UInt16);
-				CommandList.SetPipeline(LinePipeline);
-				CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
-				CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
-
-				CommandList.DrawIndexed(
-					indexCount: (uint)gridIndices.Length,
-					instanceCount: 1,
-					indexStart: 0,
-					vertexOffset: 0,
-					instanceStart: 0);
-			}
-
-			if (AxesVertexBuffer != null)
-			{
-				CommandList.SetVertexBuffer(0, AxesVertexBuffer);
-				CommandList.SetIndexBuffer(AxesIndexBuffer, IndexFormat.UInt16);
-				CommandList.SetPipeline(LinePipeline);
-				CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
-				CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
-
-				CommandList.DrawIndexed(
-					indexCount: (uint)axesIndices.Length,
-					instanceCount: 1,
-					indexStart: 0,
-					vertexOffset: 0,
-					instanceStart: 0);
-			}
-
-			if ((LinesVertexBuffer != null) && (ovpSettings.showDrawn))
-			{
-				lock (LinesVertexBuffer)
+				lock (GridVertexBuffer)
 				{
-					CommandList.SetVertexBuffer(0, LinesVertexBuffer);
-					CommandList.SetPipeline(LinesPipeline);
-					CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
-					CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
-
-					for (int l = 0; l < lineVertexCount.Length; l++)
+					try
 					{
-						CommandList.Draw(lineVertexCount[l], 1, lineFirst[l], 0);
+						CommandList.SetVertexBuffer(0, GridVertexBuffer);
+						CommandList.SetIndexBuffer(GridIndexBuffer, IndexFormat.UInt16);
+						CommandList.SetPipeline(LinePipeline);
+						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
+						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
+
+						CommandList.DrawIndexed(
+							indexCount: (uint)gridIndices.Length,
+							instanceCount: 1,
+							indexStart: 0,
+							vertexOffset: 0,
+							instanceStart: 0);
+					}
+					catch (Exception)
+					{
+
 					}
 				}
 			}
 
-			if (ovpSettings.enableFilledPolys)
+			if (AxesVertexBuffer != null)
+			{
+				lock (AxesVertexBuffer)
+				{
+					try
+					{
+						CommandList.SetVertexBuffer(0, AxesVertexBuffer);
+						CommandList.SetIndexBuffer(AxesIndexBuffer, IndexFormat.UInt16);
+						CommandList.SetPipeline(LinePipeline);
+						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
+						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
+
+						CommandList.DrawIndexed(
+							indexCount: (uint)axesIndices.Length,
+							instanceCount: 1,
+							indexStart: 0,
+							vertexOffset: 0,
+							instanceStart: 0);
+					}
+					catch (Exception)
+					{
+
+					}
+				}
+			}
+
+			if ((LinesVertexBuffer != null) && (ovpSettings.drawDrawn()))
+			{
+				lock (LinesVertexBuffer)
+				{
+					try
+					{
+						CommandList.SetVertexBuffer(0, LinesVertexBuffer);
+						CommandList.SetPipeline(LinesPipeline);
+						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
+						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
+
+						for (int l = 0; l < lineVertexCount.Length; l++)
+						{
+							CommandList.Draw(lineVertexCount[l], 1, lineFirst[l], 0);
+						}
+					}
+					catch (Exception)
+					{
+
+					}
+				}
+			}
+
+			if (ovpSettings.drawFilled())
 			{
 				if (TessVertexBuffer != null)
 				{
-					CommandList.SetVertexBuffer(0, TessVertexBuffer);
-					CommandList.SetPipeline(FilledPipeline);
-					CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
-					CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
-
-					for (int l = 0; l < tessVertexCount.Length; l++)
+					lock (TessVertexBuffer)
 					{
-						CommandList.Draw(tessVertexCount[l], 1, tessFirst[l], 0);
+						try
+						{
+							CommandList.SetVertexBuffer(0, TessVertexBuffer);
+							CommandList.SetPipeline(FilledPipeline);
+							CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
+							CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
+
+							for (int l = 0; l < tessVertexCount.Length; l++)
+							{
+								CommandList.Draw(tessVertexCount[l], 1, tessFirst[l], 0);
+							}
+						}
+						catch (Exception)
+						{
+
+						}
 					}
 				}
 			}
 
 			if (PolysVertexBuffer != null)
 			{
-				CommandList.SetVertexBuffer(0, PolysVertexBuffer);
-				CommandList.SetPipeline(LinesPipeline);
-				CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
-				CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
-
-				for (int l = 0; l < polyVertexCount.Length; l++)
+				lock (PolysVertexBuffer)
 				{
-					CommandList.Draw(polyVertexCount[l], 1, polyFirst[l], 0);
+					try
+					{
+						CommandList.SetVertexBuffer(0, PolysVertexBuffer);
+						CommandList.SetPipeline(LinesPipeline);
+						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
+						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
+
+						for (int l = 0; l < polyVertexCount.Length; l++)
+						{
+							CommandList.Draw(polyVertexCount[l], 1, polyFirst[l], 0);
+						}
+					}
+					catch (Exception)
+					{
+
+					}
 				}
 			}
 
-			if (ovpSettings.drawPoints)
+			if (ovpSettings.drawPoints())
 			{
 				if (PointsVertexBuffer != null)
 				{
-					CommandList.SetVertexBuffer(0, PointsVertexBuffer);
-					CommandList.SetPipeline(FilledPipeline);
-					CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
-					CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
-
-					for (int l = 0; l < pointsFirst.Length; l++)
+					lock (PointsVertexBuffer)
 					{
-						CommandList.Draw(3, 1, pointsFirst[l], 0);
+						try
+						{
+							CommandList.SetVertexBuffer(0, PointsVertexBuffer);
+							CommandList.SetPipeline(FilledPipeline);
+							CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
+							CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
+
+							for (int l = 0; l < pointsFirst.Length; l++)
+							{
+								CommandList.Draw(3, 1, pointsFirst[l], 0);
+							}
+						}
+						catch (Exception)
+						{
+
+						}
 					}
 				}
 			}
@@ -1066,13 +1096,10 @@ namespace VeldridEto
 		{
 			ResourceFactory factory = Surface.GraphicsDevice.ResourceFactory;
 
-			// Veldrid.SPIRV as of 1.0.12 uses "vdspv_X_Y" as the naming scheme
-			// for uniform blocks, where X is the set and Y is the binding, as
-			// defined in your GLSL shader code.
 			ResourceLayout viewMatrixLayout = factory.CreateResourceLayout(
 				new ResourceLayoutDescription(
 					new ResourceLayoutElementDescription(
-						"vdspv_0_0", // "ViewMatrix",
+						"ViewMatrix",
 						ResourceKind.UniformBuffer,
 						ShaderStages.Vertex)));
 
@@ -1082,13 +1109,10 @@ namespace VeldridEto
 			ViewMatrixSet = factory.CreateResourceSet(new ResourceSetDescription(
 				viewMatrixLayout, ViewBuffer));
 
-			// Veldrid.SPIRV as of 1.0.12 uses "vdspv_X_Y" as the naming scheme
-			// for uniform blocks, where X is the set and Y is the binding, as
-			// defined in your GLSL shader code.
 			ResourceLayout modelMatrixLayout = factory.CreateResourceLayout(
 				new ResourceLayoutDescription(
 					new ResourceLayoutElementDescription(
-						"vdspv_1_0", // "ModelMatrix",
+						"ModelMatrix",
 						ResourceKind.UniformBuffer,
 						ShaderStages.Vertex)));
 
@@ -1200,7 +1224,7 @@ namespace VeldridEto
 
 			LinesPipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription
 			{
-				BlendState = BlendStateDescription.SingleOverrideBlend,
+				BlendState = BlendStateDescription.SingleAlphaBlend,
 				DepthStencilState = new DepthStencilStateDescription(
 					depthTestEnabled: false,
 					depthWriteEnabled: false,

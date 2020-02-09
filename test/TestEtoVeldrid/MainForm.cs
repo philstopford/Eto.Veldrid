@@ -67,8 +67,8 @@ namespace TestEtoVeldrid
 			Content = Surface;
 
 			ovpSettings = new OVPSettings();
-			ovpSettings.enableFilledPolys = true;
-			ovpSettings.drawPoints = true;
+			ovpSettings.drawFilled(true);
+			ovpSettings.drawPoints(true);
 
 			addPolys();
 
@@ -103,8 +103,8 @@ namespace TestEtoVeldrid
 		void addPolys()
 		{
 			ovpSettings.clear();
-			ovpSettings.showDrawn = true;
-			ovpSettings.drawPoints = true;
+			ovpSettings.drawDrawn(true);
+			ovpSettings.drawPoints(true);
 
 			float r = 0.0f;
 
@@ -198,27 +198,27 @@ namespace TestEtoVeldrid
 			VPMenuDisplayOptionsMenu.Items.Add(new ButtonMenuItem { Text = "Toggle AA" });
 			VPMenuDisplayOptionsMenu.Items[displayOptionsSubItemIndex].Click += delegate
 			{
-				Driver.ovpSettings.antiAlias = !Driver.ovpSettings.antiAlias;
+				ovpSettings.aA(!ovpSettings.aA());
 				updateViewport();
 			};
 			displayOptionsSubItemIndex++;
 			VPMenuDisplayOptionsMenu.Items.Add(new ButtonMenuItem { Text = "Toggle Fill" });
 			VPMenuDisplayOptionsMenu.Items[displayOptionsSubItemIndex].Click += delegate
 			{
-				Driver.ovpSettings.enableFilledPolys = !Driver.ovpSettings.enableFilledPolys;
+				ovpSettings.drawFilled(!ovpSettings.drawFilled());
 				updateViewport();
 			};
 			displayOptionsSubItemIndex++;
 			VPMenuDisplayOptionsMenu.Items.Add(new ButtonMenuItem { Text = "Toggle Points" });
 			VPMenuDisplayOptionsMenu.Items[displayOptionsSubItemIndex].Click += delegate
 			{
-				Driver.ovpSettings.drawPoints = !Driver.ovpSettings.drawPoints;
+				ovpSettings.drawPoints(!ovpSettings.drawPoints());
 				updateViewport();
 			};
 			displayOptionsSubItemIndex++;
 
 			{
-				if (Driver.ovpSettings.lockedViewport)
+				if (ovpSettings.isLocked())
 				{
 					vp_menu.Items.Add(new ButtonMenuItem { Text = "Thaw" });
 				}
