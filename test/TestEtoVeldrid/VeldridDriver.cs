@@ -14,7 +14,12 @@ namespace VeldridEto
 {
 	public struct VertexPositionColor
 	{
-		public static uint SizeInBytes = (uint)Marshal.SizeOf(typeof(VertexPositionColor));
+		static uint _SizeInBytes = (uint)Marshal.SizeOf(typeof(VertexPositionColor));
+
+		public static uint SizeInBytes
+		{
+			get { return _SizeInBytes;  }
+		}
 
 		Vector3 Position;
 		RgbaFloat Color;
@@ -39,15 +44,22 @@ namespace VeldridEto
 		public string ExecutableDirectory { get; set; }
 		public string ShaderSubdirectory { get; set; }
 
-		public VeldridSurface Surface;
+		public VeldridSurface Surface { get; set; }
 
-		public UITimer Clock = new UITimer();
+		UITimer _Clock = new UITimer();
+		public UITimer Clock
+		{
+			get { return _Clock; }
+			set { _Clock = value; }
+		}
 
 		public delegate void updateHost();
 		public updateHost updateHostFunc { get; set; }
 
-		public bool ok;
-		public bool savedLocation_valid;
+		public bool ok { get; set; }
+
+		public bool savedLocation_valid { get; set; }
+
 		PointF savedLocation;
 
 		VertexPositionColor[] polyArray;
@@ -66,12 +78,12 @@ namespace VeldridEto
 		uint[] pointsFirst;
 
 		VertexPositionColor[] gridArray;
-		ushort[] gridIndices;
+		uint[] gridIndices;
 
 		VertexPositionColor[] axesArray;
-		ushort[] axesIndices;
+		uint[] axesIndices;
 
-		public OVPSettings ovpSettings;
+		public OVPSettings ovpSettings { get; set; }
 
 		CommandList CommandList;
 		DeviceBuffer GridVertexBuffer;
@@ -145,7 +157,8 @@ namespace VeldridEto
 		float gridZ;
 
 		// Use for drag handling.
-		public bool dragging;
+		public bool dragging { get; set; }
+
 		float x_orig;
 		float y_orig;
 
@@ -454,25 +467,13 @@ namespace VeldridEto
 				for (int poly = 0; poly < ovpSettings.polyList.Count; poly++)
 				{
 					float tMinX = ovpSettings.polyList[poly].poly.Min(p => p.X);
-					if (tMinX < minX)
-					{
-						minX = tMinX;
-					}
 					float tMaxX = ovpSettings.polyList[poly].poly.Max(p => p.X);
-					if (tMaxX > maxX)
-					{
-						maxX = tMaxX;
-					}
 					float tMinY = ovpSettings.polyList[poly].poly.Min(p => p.Y);
-					if (tMinY < minY)
-					{
-						minY = tMinY;
-					}
 					float tMaxY = ovpSettings.polyList[poly].poly.Max(p => p.Y);
-					if (tMaxY > maxY)
-					{
-						maxY = tMaxY;
-					}
+					minX = Math.Min(minX, tMinX);
+					maxX = Math.Max(maxX, tMaxX);
+					minY = Math.Min(minY, tMinY);
+					maxY = Math.Max(maxY, tMaxY);
 				}
 			}
 
@@ -481,25 +482,13 @@ namespace VeldridEto
 				for (int line = 0; line < ovpSettings.lineList.Count; line++)
 				{
 					float tMinX = ovpSettings.lineList[line].poly.Min(p => p.X);
-					if (tMinX < minX)
-					{
-						minX = tMinX;
-					}
 					float tMaxX = ovpSettings.lineList[line].poly.Max(p => p.X);
-					if (tMaxX > maxX)
-					{
-						maxX = tMaxX;
-					}
 					float tMinY = ovpSettings.lineList[line].poly.Min(p => p.Y);
-					if (tMinY < minY)
-					{
-						minY = tMinY;
-					}
 					float tMaxY = ovpSettings.lineList[line].poly.Max(p => p.Y);
-					if (tMaxY > maxY)
-					{
-						maxY = tMaxY;
-					}
+					minX = Math.Min(minX, tMinX);
+					maxX = Math.Max(maxX, tMaxX);
+					minY = Math.Min(minY, tMinY);
+					maxY = Math.Max(maxY, tMaxY);
 				}
 			}
 
@@ -665,10 +654,10 @@ namespace VeldridEto
 				List<VertexPositionColor> lineList = new List<VertexPositionColor>();
 
 				// Carve our Z-space up to stack polygons
-				float polyZStep = 1.0f / ovpSettings.lineList.Count();
+				float polyZStep = 1.0f / ovpSettings.lineList.Count;
 
 				// Create our first and count arrays for the vertex indices, to enable polygon separation when rendering.
-				int tmp = ovpSettings.lineList.Count();
+				int tmp = ovpSettings.lineList.Count;
 				lineFirst = new uint[tmp];
 				lineVertexCount = new uint[tmp];
 
@@ -809,15 +798,17 @@ namespace VeldridEto
 						grid.Add(new VertexPositionColor(new Vector3(x + zoom * -Surface.RenderWidth, i, gridZ), new RgbaFloat(r, g, b, 1.0f)));
 					}
 					gridArray = grid.ToArray();
-					gridIndices = new ushort[gridArray.Length];
-					for (ushort i = 0; i < gridIndices.Length; i++)
+					gridIndices = new uint[gridArray.Length];
+
+					// Might be overkill - for large arrays, though, this might be beneficial.
+					System.Threading.Tasks.Parallel.For(0, gridIndices.Length, (i) =>
 					{
-						gridIndices[i] = i;
-					}
+						gridIndices[i] = (uint)i;
+					});
 				}
 
 				updateBuffer(ref GridVertexBuffer, gridArray, VertexPositionColor.SizeInBytes, BufferUsage.VertexBuffer);
-				updateBuffer(ref GridIndexBuffer, gridIndices, sizeof(ushort), BufferUsage.IndexBuffer);
+				updateBuffer(ref GridIndexBuffer, gridIndices, sizeof(uint), BufferUsage.IndexBuffer);
 			}
 		}
 
@@ -832,10 +823,10 @@ namespace VeldridEto
 				axesArray[2] = new VertexPositionColor(new Vector3(ovpSettings.getCameraX() + Surface.RenderWidth * zoom, 0.0f, axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
 				axesArray[3] = new VertexPositionColor(new Vector3(ovpSettings.getCameraX() - Surface.RenderWidth * zoom, 0.0f, axisZ), new RgbaFloat(ovpSettings.axisColor.R, ovpSettings.axisColor.G, ovpSettings.axisColor.B, 1.0f));
 
-				axesIndices = new ushort[4] { 0, 1, 2, 3 };
+				axesIndices = new uint[4] { 0, 1, 2, 3 };
 
 				updateBuffer(ref AxesVertexBuffer, axesArray, VertexPositionColor.SizeInBytes, BufferUsage.VertexBuffer);
-				updateBuffer(ref AxesIndexBuffer, axesIndices, sizeof(ushort), BufferUsage.IndexBuffer);
+				updateBuffer(ref AxesIndexBuffer, axesIndices, sizeof(uint), BufferUsage.IndexBuffer);
 			}
 
 		}
@@ -927,7 +918,7 @@ namespace VeldridEto
 					try
 					{
 						CommandList.SetVertexBuffer(0, GridVertexBuffer);
-						CommandList.SetIndexBuffer(GridIndexBuffer, IndexFormat.UInt16);
+						CommandList.SetIndexBuffer(GridIndexBuffer, IndexFormat.UInt32);
 						CommandList.SetPipeline(LinePipeline);
 						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
 						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
@@ -953,7 +944,7 @@ namespace VeldridEto
 					try
 					{
 						CommandList.SetVertexBuffer(0, AxesVertexBuffer);
-						CommandList.SetIndexBuffer(AxesIndexBuffer, IndexFormat.UInt16);
+						CommandList.SetIndexBuffer(AxesIndexBuffer, IndexFormat.UInt32);
 						CommandList.SetPipeline(LinePipeline);
 						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
 						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);

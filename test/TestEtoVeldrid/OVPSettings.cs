@@ -21,9 +21,25 @@ namespace VeldridEto
     public class OVPSettings
 	{
         // This is true if something changed in the settings (set internally for query). The viewport itself should set this false when the changes are handled.
-        public bool changed;
+		public bool changed { get; set; }
 
-		public float minX, maxX, minY, maxY;
+        public float minX { get; set; }
+        public float maxX { get; set; }
+		public float minY { get; set; }
+		public float maxY { get; set; }
+
+		public Color minorGridColor { get; set; }
+
+		public Color majorGridColor { get; set; }
+
+		public Color axisColor { get; set; }
+
+		public Color backColor { get; set; }
+
+		public Color selectionColor { get; set; }
+
+		public Color inverseSelectionColor { get; set; }
+
 		bool enableFilledPolys;
 		bool showPoints;
 		float base_zoom;
@@ -37,28 +53,34 @@ namespace VeldridEto
 		bool showAxes;
 		bool showDrawn;
 		int grid_spacing;
-		public Color minorGridColor;
-        public Color majorGridColor;
-        public Color axisColor;
-        public Color backColor;
-        public Color selectionColor;
-        public Color inverSelectionColor;
+
 		PointF cameraPosition;
 		PointF default_cameraPosition;
 		bool antiAlias;
 		bool lockedViewport;
 
-        public List<ovp_Poly> polyList;
-        public List<int> polyListPtCount;
-        public List<int> polySourceIndex; // will eventually track source of polygon, allowing for layer generating, etc. in output.
-        public List<ovp_Poly> bgPolyList;
-        public List<int> bgPolyListPtCount;
-        public List<int> bgPolySourceIndex; // will eventually track source of polygon, allowing for layer generating, etc. in output.
-        public List<ovp_Poly> lineList; // purely for lines.
-        public List<int> lineListPtCount;
-        public List<int> lineSourceIndex; // will eventually track source of polygon, allowing for layer generating, etc. in output.
-        public List<ovp_Poly> tessPolyList; // triangles, but also need to track color. This is decoupled to allow boundary extraction without triangles getting in the way.
-        public List<bool> drawnPoly; // tracks whether the polygon corresponds to an enabled configuration or not.
+		public List<ovp_Poly> polyList { get; set; }
+
+        public List<int> polyListPtCount { get; set; }
+
+        public List<int> polySourceIndex { get; set; }
+
+        public List<ovp_Poly> bgPolyList { get; set; }
+
+        public List<int> bgPolyListPtCount { get; set; }
+
+        public List<int> bgPolySourceIndex { get; set; }
+
+        public List<ovp_Poly> lineList { get; set; }
+
+        public List<int> lineListPtCount { get; set; }
+
+        public List<int> lineSourceIndex { get; set; }
+
+        public List<ovp_Poly> tessPolyList { get; set; }
+
+        public List<bool> drawnPoly { get; set; }
+
 
         public bool aA()
         {
@@ -422,7 +444,7 @@ namespace VeldridEto
 			axisColor = new Color(0.1f, 0.1f, 0.1f);
 			backColor = new Color(1.0f, 1.0f, 1.0f);
 			selectionColor = SystemColors.Highlight;
-			inverSelectionColor = SystemColors.Highlight;
+			inverseSelectionColor = SystemColors.Highlight;
 			allowZoomAndPan = true;
 			enableFilledPolys = false;
 			showPoints = true;
@@ -461,7 +483,7 @@ namespace VeldridEto
             changed = true;
 		}
 
-		PointF[] clockwiseOrder(PointF[] iPoints)
+		static PointF[] clockwiseOrder(PointF[] iPoints)
 		{
 			// Based on stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
 			// Shoelace formula.
@@ -499,7 +521,7 @@ namespace VeldridEto
 			return iPoints;
 		}
 
-		PointF[] checkPoly(PointF[] poly)
+		static PointF[] checkPoly(PointF[] poly)
 		{
 			PointF[] source = poly.ToArray();
 
