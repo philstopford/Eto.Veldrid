@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DefineConstants>MONOMAC</DefineConstants>
     <MacBuildBundle>false</MacBuildBundle>
-    <RuntimeIdentifiers>osx.10.10-x64</RuntimeIdentifiers>
+    <OutputPath Condition="$(MacIsBuildingBundle) == 'True'"></OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
