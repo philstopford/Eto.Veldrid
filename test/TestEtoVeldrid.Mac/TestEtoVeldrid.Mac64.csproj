@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>net472;netcoreapp3.1</TargetFrameworks>
     <DefineConstants>MONOMAC</DefineConstants>
-    <RuntimeIdentifiers>osx.10.10-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Eto.Platform.Mac64" Version="2.5.0-rc.6" />
+    <PackageReference Include="Eto.Platform.Mac64" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
