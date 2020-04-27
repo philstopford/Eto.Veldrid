@@ -248,9 +248,9 @@ namespace Eto.Veldrid
 				return;
 			}
 
-			// OnResize(new ResizeEventArgs(RenderWidth, RenderHeight));
+			OnResize(new ResizeEventArgs(RenderWidth, RenderHeight));
 
-			_resizeEvent = new ResizeEventArgs(RenderWidth, RenderHeight);
+			//_resizeEvent = new ResizeEventArgs(RenderWidth, RenderHeight);
 		}
 	}
 }
