@@ -32,7 +32,7 @@ namespace Eto.Veldrid.Mac
 		{
 			Control = new MacVeldridView();
 
-			Control.Draw += Control_Draw;
+			Control.Draw += Control_Initialize;
 		}
 
 		public Swapchain CreateSwapchain()
@@ -65,7 +65,7 @@ namespace Eto.Veldrid.Mac
 			return swapchain;
 		}
 
-		private void Control_Draw(object sender, EventArgs e)
+		private void Control_Initialize(object sender, EventArgs e)
 		{
 			Callback.InitializeGraphicsBackend(Widget);
 
@@ -76,11 +76,12 @@ namespace Eto.Veldrid.Mac
 				displayLink.Start();
 			}
 
-			Control.Draw -= Control_Draw;
+			Control.Draw -= Control_Initialize;
 		}
 
 		private CVReturn HandleDisplayLinkOutputCallback(CVDisplayLink displayLink, ref CVTimeStamp inNow, ref CVTimeStamp inOutputTime, CVOptionFlags flagsIn, ref CVOptionFlags flagsOut)
 		{
+			Callback.OnResize(Widget, new ResizeEventArgs(RenderWidth, RenderHeight));
 			Callback.OnDraw(Widget, EventArgs.Empty);
 			return CVReturn.Success;
 		}
@@ -92,7 +93,11 @@ namespace Eto.Veldrid.Mac
 				case VeldridSurface.DrawEvent:
 					if (Widget.Backend == GraphicsBackend.OpenGL)
 					{
-						Control.Draw += (sender, e) => Callback.OnDraw(Widget, e);
+						Control.Draw += (sender, e) =>
+						{
+							Callback.OnResize(Widget, new ResizeEventArgs(RenderWidth, RenderHeight));
+							Callback.OnDraw(Widget, e);
+						};
 					}
 					break;
 				default:

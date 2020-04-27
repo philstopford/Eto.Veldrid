@@ -191,7 +191,7 @@ namespace Eto.Veldrid
 			OnVeldridInitialized(EventArgs.Empty);
 		}
 		
-		// protected virtual void OnDraw(EventArgs e) => Properties.TriggerEvent(DrawEvent, this, e);
+		protected virtual void OnDraw(EventArgs e) => Properties.TriggerEvent(DrawEvent, this, e);
 
 		protected virtual void OnResize(ResizeEventArgs e)
 		{
@@ -205,20 +205,6 @@ namespace Eto.Veldrid
 			Properties.TriggerEvent(ResizeEvent, this, e);
 		}
 
-		protected virtual void OnDraw(EventArgs e)
-		{
-			if (_resizeEvent != null)
-			{
-				OnResize(_resizeEvent);
-				_resizeEvent = null;
-			}
-
-			Properties.TriggerEvent(DrawEvent, this, e);
-		}
-
-		ResizeEventArgs _resizeEvent;
-
-
 		protected virtual void OnVeldridInitialized(EventArgs e) => Properties.TriggerEvent(VeldridInitializedEvent, this, e);
 
 		protected override void OnSizeChanged(EventArgs e)
@@ -231,8 +217,6 @@ namespace Eto.Veldrid
 			}
 
 			OnResize(new ResizeEventArgs(RenderWidth, RenderHeight));
-
-			//_resizeEvent = new ResizeEventArgs(RenderWidth, RenderHeight);
 		}
 	}
 }
