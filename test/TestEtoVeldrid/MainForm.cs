@@ -66,7 +66,7 @@ namespace TestEtoVeldrid
 
 			Content = Surface;
 
-			ovpSettings = new OVPSettings();
+			ovpSettings = new OVPSettings(dpiScaling: LogicalPixelSize);
 			ovpSettings.drawFilled(true);
 			ovpSettings.drawPoints(true);
 

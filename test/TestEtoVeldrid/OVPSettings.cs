@@ -18,15 +18,17 @@ namespace VeldridEto
 		}
 	}
 
-    public class OVPSettings
+	public class OVPSettings
 	{
-        // This is true if something changed in the settings (set internally for query). The viewport itself should set this false when the changes are handled.
+		// This is true if something changed in the settings (set internally for query). The viewport itself should set this false when the changes are handled.
 		public bool changed { get; set; }
 
-        public float minX { get; set; }
-        public float maxX { get; set; }
+		public float minX { get; set; }
+		public float maxX { get; set; }
 		public float minY { get; set; }
 		public float maxY { get; set; }
+
+		public float dpiFactor {get; set;}
 
 		public Color minorGridColor { get; set; }
 
@@ -431,12 +433,12 @@ namespace VeldridEto
             changed = true;
         }
 
-        public OVPSettings(float defX = 0.0f, float defY = 0.0f)
+        public OVPSettings(float defX = 0.0f, float defY = 0.0f, float dpiScaling = 1.0f)
 		{
-			init(defX, defY);
+			init(defX, defY, dpiScaling);
 		}
 
-		void init(float defX, float defY)
+		void init(float defX, float defY, float dpiScaling)
 		{
 			base_zoom = 1.0f;
 			minorGridColor = new Color(1.0f, 0.8f, 0.3f);
@@ -456,15 +458,15 @@ namespace VeldridEto
 			grid_spacing = 10;
 			antiAlias = true;
 			zoomStep = 1;
-			fullReset(defX, defY);
+			fullReset(defX, defY, dpiScaling);
 		}
 
-        public void fullReset(float defX = 0.0f, float defY = 0.0f)
+        public void fullReset(float defX = 0.0f, float defY = 0.0f, float dpiScaling = 1.0f)
         {
-            pFullReset(defX, defY);
+            pFullReset(defX, defY, dpiScaling);
         }
 
-        void pFullReset(float defX = 0.0f, float defY = 0.0f)
+        void pFullReset(float defX = 0.0f, float defY = 0.0f, float dpiScaling = 1.0f)
         {
             default_cameraPosition = new PointF(defX, defY);
 			bgPolyList = new List<ovp_Poly>();
@@ -480,6 +482,7 @@ namespace VeldridEto
 			drawnPoly = new List<bool>();
 			zoomFactor = 1.0f;
 			cameraPosition = new PointF(default_cameraPosition.X, default_cameraPosition.Y);
+			dpiFactor = dpiScaling;
             changed = true;
 		}
 
