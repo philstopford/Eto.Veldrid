@@ -11,8 +11,6 @@ namespace TestEtoVeldrid.Mac
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			VeldridSurface.InitializeOpenTK();
-
 			var platform = new Eto.Mac.Platform();
 
 			// FIXME: This seems to be necessary in order for Mac Release builds

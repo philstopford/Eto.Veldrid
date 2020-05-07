@@ -12,12 +12,11 @@
 
   <ItemGroup>
     <PackageReference Include="Eto.Platform.Gtk" Version="2.5.0-ci-10388" />
-    <PackageReference Include="OpenTK" Version="3.1.0" />
+    <PackageReference Include="Eto.Veldrid.Gtk" Version="0.1.0-CI.91052407" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TestEtoVeldrid\TestEtoVeldrid.csproj" />
-    <ProjectReference Include="..\..\src\Eto.Veldrid.Gtk\Eto.Veldrid.Gtk.csproj" />
   </ItemGroup>
   
 </Project>

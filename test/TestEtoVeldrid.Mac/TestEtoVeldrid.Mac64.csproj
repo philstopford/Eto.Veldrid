@@ -8,11 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="Eto.Platform.Mac64" Version="2.5.0-ci-10388" />
+    <PackageReference Include="Eto.Veldrid.Mac64" Version="0.1.0-CI.91052407" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TestEtoVeldrid\TestEtoVeldrid.csproj" />
-    <ProjectReference Include="..\..\src\Eto.Veldrid.Mac\Eto.Veldrid.Mac64.csproj" />
   </ItemGroup>
 
   <!--Eto's MacTemplate.targets file doesn't automatically pack native .dylib

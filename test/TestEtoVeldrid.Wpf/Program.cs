@@ -9,8 +9,6 @@ namespace TestEtoVeldrid.Wpf
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			VeldridSurface.InitializeOpenTK();
-
 			var platform = new Eto.Wpf.Platform();
 
 			new Application(platform).Run(new MainForm());
