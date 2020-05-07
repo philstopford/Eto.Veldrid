@@ -276,7 +276,7 @@ namespace VeldridEto
 			}
 			if (e.Buttons == MouseButtons.Primary)
 			{
-				PointF scaledLocation = e.Location * Surface.dpiFactor;
+				PointF scaledLocation = e.Location * Surface.ParentWindow.LogicalPixelSize;
 
 				if (!dragging)
 				{

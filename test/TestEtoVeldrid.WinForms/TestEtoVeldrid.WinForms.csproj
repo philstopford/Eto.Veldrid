@@ -14,12 +14,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Eto.Veldrid.WinForms\Eto.Veldrid.WinForms.csproj" />
     <ProjectReference Include="..\TestEtoVeldrid\TestEtoVeldrid.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Eto.Platform.Windows" Version="2.5.0" />
+    <PackageReference Include="Eto.Veldrid.WinForms" Version="0.1.0-CI.91052407" />
   </ItemGroup>
 
   <Import Condition="'$(HaveWindowsDesktopSdk)' != 'true'" Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />

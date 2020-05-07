@@ -14,17 +14,12 @@
 
   <ItemGroup>
     <PackageReference Include="Eto.Forms" Version="2.5.0" />
+    <PackageReference Include="Eto.Veldrid" Version="0.1.0-CI.91052407" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Unofficial.LibTessDotNet" Version="2.0.2" />
-    <PackageReference Include="Veldrid" Version="4.7.0" />
-    <PackageReference Include="Veldrid.SPIRV" Version="$(VeldridSpirvVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Eto.Veldrid\Eto.Veldrid.csproj" />
   </ItemGroup>
 
 </Project>
