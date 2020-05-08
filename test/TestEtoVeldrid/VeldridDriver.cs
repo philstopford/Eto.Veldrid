@@ -18,7 +18,7 @@ namespace VeldridEto
 
 		public static uint SizeInBytes
 		{
-			get { return _SizeInBytes;  }
+			get => _SizeInBytes;
 		}
 
 		Vector3 Position;
@@ -46,20 +46,13 @@ namespace VeldridEto
 
 		public VeldridSurface Surface { get; set; }
 
-		UITimer _Clock = new UITimer();
-		public UITimer Clock
-		{
-			get { return _Clock; }
-			set { _Clock = value; }
-		}
+		public UITimer Clock = new UITimer();
 
 		public delegate void updateHost();
 		public updateHost updateHostFunc { get; set; }
 
 		public bool ok { get; set; }
-
 		public bool savedLocation_valid { get; set; }
-
 		PointF savedLocation;
 
 		VertexPositionColor[] polyArray;
@@ -83,7 +76,7 @@ namespace VeldridEto
 		VertexPositionColor[] axesArray;
 		uint[] axesIndices;
 
-		public OVPSettings ovpSettings { get; set; }
+		public OVPSettings ovpSettings;
 
 		CommandList CommandList;
 		DeviceBuffer GridVertexBuffer;
@@ -99,6 +92,7 @@ namespace VeldridEto
 		Pipeline PointsPipeline;
 		Pipeline LinePipeline;
 		Pipeline LinesPipeline;
+		Pipeline PolyOutlinePipeline;
 		Pipeline FilledPipeline;
 
 		Matrix4x4 ModelMatrix = Matrix4x4.Identity;
@@ -148,6 +142,8 @@ namespace VeldridEto
 			ovpSettings.changed = false;
 
 			Draw();
+
+			Surface.Invalidate();
 		}
 
 		private DateTime CurrentTime;
@@ -158,7 +154,6 @@ namespace VeldridEto
 
 		// Use for drag handling.
 		public bool dragging { get; set; }
-
 		float x_orig;
 		float y_orig;
 
@@ -324,8 +319,8 @@ namespace VeldridEto
 
 		public void zoomIn(float delta)
 		{
-            ovpSettings.setZoomFactor(ovpSettings.getZoomFactor() + (ovpSettings.getZoomStep() * 0.01f * delta));
-            updateHostFunc?.Invoke();
+			ovpSettings.setZoomFactor(ovpSettings.getZoomFactor() + (ovpSettings.getZoomStep() * 0.01f * delta));
+			updateHostFunc?.Invoke();
 		}
 
 		public void zoomOut(float delta)
@@ -334,7 +329,30 @@ namespace VeldridEto
             updateHostFunc?.Invoke();
         }
 
-        void panVertical(float delta)
+		public void fastZoomIn(float delta)
+		{
+			ovpSettings.setZoomFactor(ovpSettings.getZoomFactor() * calcZoom(delta));
+			updateHostFunc?.Invoke();
+		}
+
+		public void fastZoomOut(float delta)
+		{
+			ovpSettings.setZoomFactor(ovpSettings.getZoomFactor() / calcZoom(delta));
+			updateHostFunc?.Invoke();
+		}
+
+		float calcZoom (float delta)
+		{
+			float f = Math.Abs(delta) * 0.1f;
+			if (delta < 0)
+			{
+				f = 1.0f / f;
+			}
+
+			return f;
+		}
+
+		void panVertical(float delta)
 		{
             ovpSettings.setCameraY(ovpSettings.getCameraY() + (delta / 10));
 		}
@@ -510,9 +528,9 @@ namespace VeldridEto
 
 				List<VertexPositionColor> tessPolyList = new List<VertexPositionColor>();
 
-				int polyListCount = ovpSettings.polyList.Count();
-				int bgPolyListCount = ovpSettings.bgPolyList.Count();
-				int tessPolyListCount = ovpSettings.tessPolyList.Count();
+				int polyListCount = ovpSettings.polyList.Count;
+				int bgPolyListCount = ovpSettings.bgPolyList.Count;
+				int tessPolyListCount = ovpSettings.tessPolyList.Count;
 
 				// Carve our Z-space up to stack polygons
 				int numPolys = 1;
@@ -539,7 +557,7 @@ namespace VeldridEto
 				int counter = 0; // vertex count that will be used to define 'first' index for each polygon.
 				int previouscounter = 0; // will be used to derive the number of vertices in each polygon.
 
-				float polyZ = 0;
+				float polyZ = 0.0f;
 
 				if (ovpSettings.drawFilled())
 				{
@@ -799,12 +817,10 @@ namespace VeldridEto
 					}
 					gridArray = grid.ToArray();
 					gridIndices = new uint[gridArray.Length];
-
-					// Might be overkill - for large arrays, though, this might be beneficial.
-					System.Threading.Tasks.Parallel.For(0, gridIndices.Length, (i) =>
+					for (uint i = 0; i < gridIndices.Length; i++)
 					{
-						gridIndices[i] = (uint)i;
-					});
+						gridIndices[i] = i;
+					}
 				}
 
 				updateBuffer(ref GridVertexBuffer, gridArray, VertexPositionColor.SizeInBytes, BufferUsage.VertexBuffer);
@@ -963,29 +979,6 @@ namespace VeldridEto
 				}
 			}
 
-			if ((LinesVertexBuffer != null) && (ovpSettings.drawDrawn()))
-			{
-				lock (LinesVertexBuffer)
-				{
-					try
-					{
-						CommandList.SetVertexBuffer(0, LinesVertexBuffer);
-						CommandList.SetPipeline(LinesPipeline);
-						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
-						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
-
-						for (int l = 0; l < lineVertexCount.Length; l++)
-						{
-							CommandList.Draw(lineVertexCount[l], 1, lineFirst[l], 0);
-						}
-					}
-					catch (Exception)
-					{
-
-					}
-				}
-			}
-
 			if (ovpSettings.drawFilled())
 			{
 				if (TessVertexBuffer != null)
@@ -1019,13 +1012,36 @@ namespace VeldridEto
 					try
 					{
 						CommandList.SetVertexBuffer(0, PolysVertexBuffer);
-						CommandList.SetPipeline(LinesPipeline);
+						CommandList.SetPipeline(PolyOutlinePipeline);
 						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
 						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
 
 						for (int l = 0; l < polyVertexCount.Length; l++)
 						{
 							CommandList.Draw(polyVertexCount[l], 1, polyFirst[l], 0);
+						}
+					}
+					catch (Exception)
+					{
+
+					}
+				}
+			}
+
+			if ((LinesVertexBuffer != null) && (ovpSettings.drawDrawn()))
+			{
+				lock (LinesVertexBuffer)
+				{
+					try
+					{
+						CommandList.SetVertexBuffer(0, LinesVertexBuffer);
+						CommandList.SetPipeline(LinesPipeline);
+						CommandList.SetGraphicsResourceSet(0, ViewMatrixSet);
+						CommandList.SetGraphicsResourceSet(1, ModelMatrixSet);
+
+						for (int l = 0; l < lineVertexCount.Length; l++)
+						{
+							CommandList.Draw(lineVertexCount[l], 1, lineFirst[l], 0);
 						}
 					}
 					catch (Exception)
@@ -1060,6 +1076,7 @@ namespace VeldridEto
 					}
 				}
 			}
+
 			CommandList.End();
 
 			try
@@ -1214,6 +1231,27 @@ namespace VeldridEto
 			});
 
 			LinesPipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription
+			{
+				BlendState = BlendStateDescription.SingleAlphaBlend,
+				DepthStencilState = new DepthStencilStateDescription(
+					depthTestEnabled: false,
+					depthWriteEnabled: false,
+					comparisonKind: ComparisonKind.LessEqual),
+				RasterizerState = new RasterizerStateDescription(
+					cullMode: FaceCullMode.Back,
+					fillMode: PolygonFillMode.Solid,
+					frontFace: FrontFace.Clockwise,
+					depthClipEnabled: false,
+					scissorTestEnabled: false),
+				PrimitiveTopology = PrimitiveTopology.LineStrip,
+				ResourceLayouts = new[] { viewMatrixLayout, modelMatrixLayout },
+				ShaderSet = new ShaderSetDescription(
+					vertexLayouts: new VertexLayoutDescription[] { vertexLayout },
+					shaders: shaders),
+				Outputs = Surface.Swapchain.Framebuffer.OutputDescription
+			});
+
+			PolyOutlinePipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription
 			{
 				BlendState = BlendStateDescription.SingleAlphaBlend,
 				DepthStencilState = new DepthStencilStateDescription(

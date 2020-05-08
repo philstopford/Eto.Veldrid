@@ -5,9 +5,7 @@ namespace VeldridEto
 	public class ovp_Poly
 	{
 		public PointF[] poly { get; set; }
-
 		public Color color { get; set; }
-
 		public float alpha { get; set; }
 
 		public ovp_Poly(PointF[] geometry, Color geoColor)

@@ -129,6 +129,10 @@ namespace TestEtoVeldrid
 
 			ovpSettings.addPolygon(testPoly, Color.FromArgb(255, 0, 0), 1.0f, true, 2);
 
+			ovpSettings.addLine(testPoly2, Color.FromArgb(0, 255, 0), 1.0f, 5);
+
+			ovpSettings.addLine(testPoly, Color.FromArgb(0, 0, 255), 1.0f, 6);
+
 			r = -30.0f;
 
 			PointF[] testPolyF1 = new PointF[6];
@@ -147,10 +151,13 @@ namespace TestEtoVeldrid
 			testPolyF2[4] = new PointF(13.0f + r, 2.0f + r);
 			testPolyF2[5] = new PointF(12.0f + r, 2.0f + r);
 
-
 			ovpSettings.addPolygon(testPolyF2, Color.FromArgb(0, 255, 255), 0.5f, false, 3);
 
 			ovpSettings.addPolygon(testPolyF1, Color.FromArgb(255, 0, 0), 1.0f, false, 4);
+
+			ovpSettings.addLine(testPolyF2, Color.FromArgb(0, 255, 0), 1.0f, 7);
+
+			ovpSettings.addLine(testPolyF1, Color.FromArgb(0, 0, 255), 1.0f, 8);
 
 			r = 30.0f;
 
@@ -174,6 +181,10 @@ namespace TestEtoVeldrid
 			ovpSettings.addBGPolygon(testPolyBG2, Color.FromArgb(0, 255, 255), 1.0f, 3);
 
 			ovpSettings.addBGPolygon(testPolyBG1, Color.FromArgb(255, 0, 0), 1.0f, 4);
+
+			ovpSettings.addLine(testPolyBG2, Color.FromArgb(0, 255, 0), 1.0f, 9);
+
+			ovpSettings.addLine(testPolyBG1, Color.FromArgb(0, 0, 255), 1.0f, 10);
 		}
 
 		ContextMenu vp_menu;

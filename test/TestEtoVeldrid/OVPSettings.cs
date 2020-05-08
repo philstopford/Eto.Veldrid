@@ -21,26 +21,32 @@ namespace VeldridEto
     public class OVPSettings
 	{
         // This is true if something changed in the settings (set internally for query). The viewport itself should set this false when the changes are handled.
-		public bool changed { get; set; }
+        public bool changed { get; set; }
 
-        public float minX { get; set; }
+		public float minX { get; set; }
         public float maxX { get; set; }
-		public float minY { get; set; }
-		public float maxY { get; set; }
+        public float minY { get; set; }
+        public float maxY { get; set; }
+        public Color minorGridColor { get; set; }
+        public Color majorGridColor { get; set; }
+        public Color axisColor { get; set; }
+        public Color backColor { get; set; }
+        public Color selectionColor { get; set; }
+        public Color inverSelectionColor { get; set; }
 
-		public Color minorGridColor { get; set; }
+        public List<ovp_Poly> polyList { get; set; }
+        public List<int> polyListPtCount { get; set; }
+        public List<int> polySourceIndex { get; set; } // will eventually track source of polygon, allowing for layer generating, etc. in output.
+        public List<ovp_Poly> bgPolyList { get; set; }
+        public List<int> bgPolyListPtCount { get; set; }
+        public List<int> bgPolySourceIndex { get; set; } // will eventually track source of polygon, allowing for layer generating, etc. in output.
+        public List<ovp_Poly> lineList { get; set; } // purely for lines.
+        public List<int> lineListPtCount { get; set; }
+        public List<int> lineSourceIndex { get; set; } // will eventually track source of polygon, allowing for layer generating, etc. in output.
+        public List<ovp_Poly> tessPolyList { get; set; } // triangles, but also need to track color. This is decoupled to allow boundary extraction without triangles getting in the way.
+        public List<bool> drawnPoly { get; set; } // tracks whether the polygon corresponds to an enabled configuration or not.
 
-		public Color majorGridColor { get; set; }
-
-		public Color axisColor { get; set; }
-
-		public Color backColor { get; set; }
-
-		public Color selectionColor { get; set; }
-
-		public Color inverseSelectionColor { get; set; }
-
-		bool enableFilledPolys;
+        bool enableFilledPolys;
 		bool showPoints;
 		float base_zoom;
 		float zoomFactor;
@@ -53,34 +59,10 @@ namespace VeldridEto
 		bool showAxes;
 		bool showDrawn;
 		int grid_spacing;
-
 		PointF cameraPosition;
 		PointF default_cameraPosition;
 		bool antiAlias;
 		bool lockedViewport;
-
-		public List<ovp_Poly> polyList { get; set; }
-
-        public List<int> polyListPtCount { get; set; }
-
-        public List<int> polySourceIndex { get; set; }
-
-        public List<ovp_Poly> bgPolyList { get; set; }
-
-        public List<int> bgPolyListPtCount { get; set; }
-
-        public List<int> bgPolySourceIndex { get; set; }
-
-        public List<ovp_Poly> lineList { get; set; }
-
-        public List<int> lineListPtCount { get; set; }
-
-        public List<int> lineSourceIndex { get; set; }
-
-        public List<ovp_Poly> tessPolyList { get; set; }
-
-        public List<bool> drawnPoly { get; set; }
-
 
         public bool aA()
         {
@@ -316,11 +298,11 @@ namespace VeldridEto
 
 		void pUpdateColors(Color newColor)
 		{
-			for (int poly = 0; poly < polyList.Count(); poly++)
+			for (int poly = 0; poly < polyList.Count; poly++)
 			{
 				polyList[poly].color = newColor;
 			}
-			for (int poly = 0; poly < tessPolyList.Count(); poly++)
+			for (int poly = 0; poly < tessPolyList.Count; poly++)
 			{
 				tessPolyList[poly].color = newColor;
 			}
@@ -444,7 +426,7 @@ namespace VeldridEto
 			axisColor = new Color(0.1f, 0.1f, 0.1f);
 			backColor = new Color(1.0f, 1.0f, 1.0f);
 			selectionColor = SystemColors.Highlight;
-			inverseSelectionColor = SystemColors.Highlight;
+			inverSelectionColor = SystemColors.Highlight;
 			allowZoomAndPan = true;
 			enableFilledPolys = false;
 			showPoints = true;
@@ -483,7 +465,7 @@ namespace VeldridEto
             changed = true;
 		}
 
-		static PointF[] clockwiseOrder(PointF[] iPoints)
+		PointF[] clockwiseOrder(PointF[] iPoints)
 		{
 			// Based on stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
 			// Shoelace formula.
@@ -521,7 +503,7 @@ namespace VeldridEto
 			return iPoints;
 		}
 
-		static PointF[] checkPoly(PointF[] poly)
+		PointF[] checkPoly(PointF[] poly)
 		{
 			PointF[] source = poly.ToArray();
 
