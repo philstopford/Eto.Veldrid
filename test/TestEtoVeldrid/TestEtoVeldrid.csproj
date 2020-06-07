@@ -13,13 +13,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Eto.Forms" Version="2.5.0" />
-    <PackageReference Include="Eto.Veldrid" Version="0.1.0-CI.91052407" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+    <PackageReference Include="Eto.Forms" Version="2.5.2" />
+    <PackageReference Include="Eto.Veldrid" Version="0.1.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Unofficial.LibTessDotNet" Version="2.0.2" />
+    <PackageReference Include="Veldrid.SPIRV" Version="1.0.13" />
   </ItemGroup>
 
 </Project>
