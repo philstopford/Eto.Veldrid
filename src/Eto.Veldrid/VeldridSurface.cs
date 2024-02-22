@@ -107,7 +107,8 @@ namespace Eto.Veldrid
 
 		public VeldridSurface(GraphicsBackend backend, GraphicsDeviceOptions gdOptions)
 		{
-			Backend = backend;
+			// Backend = backend;
+			Backend = GraphicsBackend.Vulkan;
 			GraphicsDeviceOptions = gdOptions;
 			Initialize();
 		}

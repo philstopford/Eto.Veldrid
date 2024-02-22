@@ -5,6 +5,7 @@ using Eto.Veldrid.Gtk;
 using Gtk;
 using System;
 using Veldrid;
+using Veldrid.Vk;
 
 [assembly: Eto.ExportHandler(typeof(VeldridSurface), typeof(GtkVeldridSurfaceHandler))]
 
@@ -44,9 +45,13 @@ namespace Eto.Veldrid.Gtk
 				//
 				//   https://github.com/mellinoe/veldrid/issues/155
 				//
-				var source = SwapchainSource.CreateXlib(
+				/*
+				var source2 = SwapchainSource.CreateXlib(
 					X11Interop.gdk_x11_display_get_xdisplay(Control.Display.Handle),
 					X11Interop.gdk_x11_window_get_xid(Control.Window.Handle));
+					*/
+
+				var source = SwapchainSource.CreateWayland(Control.Display.Handle, Control.Window.Handle);
 
 				var renderSize = RenderSize;
 				swapchain = Widget.GraphicsDevice.ResourceFactory.CreateSwapchain(
@@ -138,7 +143,10 @@ namespace Eto.Veldrid.Gtk
 		// TODO: Figure this one out! The docstring for this property in Veldrid's OpenGLPlatformInfo is ambiguous.
 		IntPtr VeldridSurface.IOpenGL.OpenGLContextHandle => glArea?.Context.Handle ?? IntPtr.Zero;
 
-		IntPtr VeldridSurface.IOpenGL.GetProcAddress(string name) => X11Interop.glXGetProcAddress(name);
+		IntPtr VeldridSurface.IOpenGL.GetProcAddress(string name)
+		{
+			return X11Interop.glXGetProcAddress(name);
+		}
 
 		void VeldridSurface.IOpenGL.MakeCurrent(IntPtr context) => MakeCurrent();
 
