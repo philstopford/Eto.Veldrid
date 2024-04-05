@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Title>Veldrid Control for Eto.Forms</Title>
+    <Description>
+      This provides the control to use in your Eto.Forms application.
+      Add the platform-specific package for each platform you wish to support. E.g. Eto.Veldrid.Gtk, Eto.Veldrid.Mac64, Eto.Veldrid.Wpf, etc.
+    </Description>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Eto.Forms" Version="2.8.3" />
+    <PackageReference Include="Veldrid" Version="4.9.0" />
+    <PackageReference Include="Veldrid.OpenGLBindings" Version="4.9.0" />
+  </ItemGroup>
+  
+</Project>
