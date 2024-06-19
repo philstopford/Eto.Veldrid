@@ -42,9 +42,19 @@ namespace Eto.Veldrid.Gtk
 				//
 				//   https://github.com/mellinoe/veldrid/issues/155
 				//
-				var source = SwapchainSource.CreateXlib(
-					X11Interop.gdk_x11_display_get_xdisplay(Control.Display.Handle),
-					X11Interop.gdk_x11_window_get_xid(Control.Window.Handle));
+				SwapchainSource source;
+				if (Environment.GetEnvironmentVariable("XDG_SESSION_TYPE") == "wayland")
+				{
+					source = SwapchainSource.CreateWayland(
+						WaylandInterop.gdk_wayland_display_get_wl_display(Control.Display.Handle),
+						WaylandInterop.gdk_wayland_window_get_wl_surface(Control.Window.Handle));
+				}
+				else
+				{
+					source = SwapchainSource.CreateXlib(
+						X11Interop.gdk_x11_display_get_xdisplay(Control.Display.Handle),
+						X11Interop.gdk_x11_window_get_xid(Control.Window.Handle));
+				}
 
 				var renderSize = RenderSize;
 				swapchain = Widget.GraphicsDevice?.ResourceFactory.CreateSwapchain(

@@ -8,10 +8,19 @@
             "args": [
                 "build",
                 "${workspaceFolder}/Eto.Veldrid.sln",
-                "/p:Configuration=${input:configuration}",
+                "-c:${input:configuration}",
+                "-clp:NoSummary",
                 "/p:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
             ],
+            "linux": {
+                "args": [
+                    "build",
+                    "${workspaceFolder}/test/TestEtoVeldrid.Gtk/TestEtoVeldrid.Gtk.csproj",
+                    "-c:${input:configuration}",
+                    "-clp:NoSummary",
+                    "/p:GenerateFullPaths=true",
+                    ]
+            },
             "problemMatcher": "$msCompile",
             "presentation": {
                 "reveal": "always",
@@ -25,9 +34,9 @@
             "args": [
                 "pack",
                 "${workspaceFolder}/Eto.Veldrid.sln",
-                "/p:Configuration=${input:configuration}",
+                "-c:${input:configuration}",
                 "/p:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "-clp:NoSummary"
             ],
             "problemMatcher": "$msCompile",
             "presentation": {

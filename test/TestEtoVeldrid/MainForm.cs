@@ -38,7 +38,7 @@ namespace TestEtoVeldrid
 			}
 		}
 
-		public MainForm() : this(VeldridSurface.PreferredBackend)
+		public MainForm() : this(GraphicsBackend.Vulkan)
 		{
 		}
 		public MainForm(GraphicsBackend backend)
