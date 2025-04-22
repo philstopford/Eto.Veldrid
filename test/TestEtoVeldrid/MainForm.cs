@@ -57,7 +57,7 @@ namespace TestEtoVeldrid
 			// will make more sense to developers used to e.g. OpenGL or Direct3D.
 			var options = new GraphicsDeviceOptions(
 				false,
-				PixelFormat.R32_Float,
+				PixelFormat.R32Float,
 				false,
 				ResourceBindingModel.Improved);
 

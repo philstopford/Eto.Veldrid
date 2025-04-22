@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net462</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <Title>Veldrid Windows Forms implementation for Eto.Forms</Title>
     <Description>This provides the Windows Forms implementation of Eto.Veldrid for Eto.Forms</Description>
+    <TargetFramework>net9.0-windows</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Eto.Platform.Windows" Version="2.8.2" />
+    <PackageReference Include="Eto.Platform.Windows" Version="2.9.0-ci-20250329.14150108340" />
   </ItemGroup>
 
 </Project>

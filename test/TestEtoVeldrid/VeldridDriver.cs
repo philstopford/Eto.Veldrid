@@ -150,7 +150,7 @@ public partial class VeldridDriver
 	{
 		LinePipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription
 		{
-			BlendState = BlendStateDescription.SingleOverrideBlend,
+			BlendState = BlendStateDescription.SINGLE_OVERRIDE_BLEND,
 			DepthStencilState = new DepthStencilStateDescription(
 				depthTestEnabled: true,
 				depthWriteEnabled: true,
@@ -171,7 +171,7 @@ public partial class VeldridDriver
 
 		LinesPipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription
 		{
-			BlendState = BlendStateDescription.SingleAlphaBlend,
+			BlendState = BlendStateDescription.SINGLE_ALPHA_BLEND,
 			DepthStencilState = new DepthStencilStateDescription(
 				depthTestEnabled: false,
 				depthWriteEnabled: false,
@@ -192,7 +192,7 @@ public partial class VeldridDriver
 
 		FilledPipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription
 		{
-			BlendState = BlendStateDescription.SingleAlphaBlend,
+			BlendState = BlendStateDescription.SINGLE_ALPHA_BLEND,
 			DepthStencilState = new DepthStencilStateDescription(
 				depthTestEnabled: false,
 				depthWriteEnabled: false,

@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
     <ApplicationManifest>app1.manifest</ApplicationManifest>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWPF>true</UseWPF>
     <!-- prevent warning with Extended.Wpf.Toolkit in .NET Core -->
     <NoWarn>NU1701</NoWarn>
+    <TargetFramework>net9.0-windows</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,13 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Eto.Platform.Wpf" Version="2.8.2" />
+    <PackageReference Include="Eto.Platform.Wpf" Version="2.9.0-ci-20250329.14150108340" />
 
     <!-- Please note that version 3.6.0 is the newest version of this toolkit
     that has licensing terms permitting use in commercial projects.
     https://github.com/picoe/Eto/issues/1544
     https://github.com/xceedsoftware/wpftoolkit/issues/1557 -->
-    <PackageReference Include="Extended.Wpf.Toolkit" Version="[3.6.0]" />
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="3.8.2" />
   </ItemGroup>
 
 </Project>

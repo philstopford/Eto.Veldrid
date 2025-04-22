@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <DefineConstants>GTK3</DefineConstants>
     <Title>Veldrid Gtk implementation for Eto.Forms</Title>
     <Description>This provides the Gtk implementation of Eto.Veldrid for Eto.Forms</Description>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Eto.Platform.Gtk" Version="2.8.2" />
+    <PackageReference Include="Eto.Platform.Gtk" Version="2.9.0-ci-20250329.14150108340" />
   </ItemGroup>
 
   <ItemGroup>

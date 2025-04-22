@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RuntimeIdentifiers>osx-x64;osx-arm64</RuntimeIdentifiers>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <DefineConstants>MONOMAC</DefineConstants>
   </PropertyGroup>
 
@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Eto.Platform.Mac64" Version="2.8.2" />
+    <PackageReference Include="Eto.Platform.Mac64" Version="2.9.0-ci-20250329.14150108340" />
   </ItemGroup>
 
   <ItemGroup>
